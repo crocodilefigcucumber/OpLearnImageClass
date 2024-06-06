@@ -1,0 +1,22 @@
+seed: 42
+model:
+  type: resnet
+  size: 18
+dataset:
+  name: CIFAR10
+  path: "../../datasets"
+  train_split: 0.9
+  download: True
+  batch_size: 128
+  batch_size_test: 100
+  num_workers: 1
+CUDA:
+  use_cuda: True
+  cuda_device: 0
+train:
+  loss: crossentropy
+  epochs: 100
+  verbosity: 1
+  opt:
+    name: Adam
+    lr: 0.0001
