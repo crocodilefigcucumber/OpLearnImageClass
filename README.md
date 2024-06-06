@@ -1,8 +1,15 @@
 # Experiments on FMNIST/Other Datasets
 
-Original Setup has been taken from [here](https://github.com/samirak98/FourierImaging), [arxiv](https://arxiv.org/abs/2304.01227)
+Original Setup has been taken from [here](https://github.com/samirak98/FourierImaging), [arxiv](https://arxiv.org/abs/2304.01227).
+
+
 
 ## SpectralConv2d
+Install: In the directory simply run
+
+```bash
+pip install -e .
+```
 
 - ```in_channels, out_channels```: clear
 - ```paramterization```: 'spatial', 'spectral' how to parameterize the kernel. Convertable, but differences in training opt
