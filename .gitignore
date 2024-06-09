@@ -1,5 +1,5 @@
-/__pycache__/
+*/__pycache__/
 *.pyc
-/saved_models/
-/multirun/
-/outputs/
+*/saved_models/
+*/multirun/
+*/outputs/
