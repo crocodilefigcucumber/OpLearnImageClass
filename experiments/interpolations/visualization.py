@@ -3,10 +3,12 @@ from matplotlib import rc
 from cycler import cycler
 import csv
 import numpy as np
+import seaborn as sns
 #%% visulaize data
 plt.close('all')
 #plt.style.use(['ggplot'])
-plt.style.use(['seaborn-whitegrid'])
+#plt.style.use(['seaborn-whitegrid'])
+sns.set_style('whitegrid')
 default_cycler = (cycler(color=['xkcd:sky', 
                                 'xkcd:apple','olive','xkcd:grapefruit',\
                                 'xkcd:muted blue','peru','tab:pink',\
@@ -73,4 +75,4 @@ save = True
 if save:
     plt.tight_layout(pad=0.1)
     #plt.savefig('CUB200-Interpolation.pdf')
-    plt.savefig('FMNIST-Interpolation.pdf')
+    plt.savefig('FMNIST-Interpolation-test.pdf')

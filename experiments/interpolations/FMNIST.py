@@ -20,8 +20,8 @@ import fourierimaging.train as train
 from omegaconf import DictConfig, OmegaConf, open_dict
 from select_sizing import sizing
 
-path = '../saved_models/cnns/cnn-5-5'
-#path = '../saved_models/cnn-5-5-20230129-223101'
+#path = '../saved_models/cnns/cnn-5-5'
+path = '../saved_models/spectral-cnn-spectral-28-28-20240611-131610'
 conf = torch.load(path)['conf']
 spectral = True
 
