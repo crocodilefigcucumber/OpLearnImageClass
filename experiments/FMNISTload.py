@@ -10,15 +10,20 @@ def load_FMNIST(conf, size):
     valid = None
     if conf.name == "FashionMNIST":
         # load FMNIST
-        conf.im_shape = [1, size[0], size[1]]
         transform = transforms.Compose(
             [transforms.ToTensor(), TrigonometricResize_2d(size)]
         )
         train = datasets.FashionMNIST(
-            conf.path, train=True, download=conf.download, transform=transform
+            conf.path + "/" + str(size),
+            train=True,
+            download=conf.download,
+            transform=transform,
         )
         test = datasets.FashionMNIST(
-            conf.path, train=False, download=conf.download, transform=transform
+            conf.path + "/" + str(size),
+            train=False,
+            download=conf.download,
+            transform=transform,
         )
     else:
         raise ValueError("Unknown dataset: " + conf.name)

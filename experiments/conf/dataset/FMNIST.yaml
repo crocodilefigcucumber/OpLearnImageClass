@@ -8,3 +8,4 @@ num_workers: 8
 im_shape: [1,28,28]
 mean: 0.5
 std: 0.5
+num_classes: 10
