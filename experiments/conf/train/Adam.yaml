@@ -7,3 +7,4 @@ opt:
   lr_scheduler: Plateau
 save: True
 save_dir: saved_models/
+patience: 10

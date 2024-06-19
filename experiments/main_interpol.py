@@ -18,7 +18,7 @@ import fourierimaging as fi
 from fourierimaging.utils.helpers import load_model, init_opt, fix_seed
 from fourierimaging.utils import datasets as data
 import fourierimaging.train as train
-from FMNISTload import load_FMNIST
+from helpers import load_FMNIST, EarlyStopping
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
@@ -64,6 +64,8 @@ def main(conf: DictConfig) -> None:
     print("Total number of params: " + str(total_params) + " parameters")
     print("Number of trainable params: " + str(total_trainable_params))
 
+    early_stopping = EarlyStopping(patience=conf.train.patience, verbose=True)
+
     for i in range(conf["train"]["epochs"]):
         print(50 * ".")
         print("Starting epoch: " + str(i))
@@ -82,18 +84,35 @@ def main(conf: DictConfig) -> None:
             if key in train_data:
                 history[key].append(train_data[key])
 
+        early_stopping(val_data["val_loss"], model)
+
+        if early_stopping.early_stop:
+            print("Early stopping")
+            break
+
     tester = train.Tester(test_loader, conf.train)
     tester(model)
 
     if conf.train.save:
         time_str = time.strftime("%Y%m%d-%H%M%S")
         save_name = conf.train.save_dir
-        save_name += model.name() + "imshape-" + str(conf["im_shape"]) + "-" + time_str
+        save_name += (
+            model.name()
+            + "imshape-"
+            + str(conf["im_shape"])
+            + "-"
+            + "epoch-"
+            + str(i)
+            + "-"
+            + time_str
+        )
         torch.save(
             {
                 "conf": conf,
                 "history": history,
                 "model_state_dict": model.state_dict(),
+                "im_shape": conf["im_shape"],
+                "trained_til_epoch": i,
             },
             save_name,
         )
