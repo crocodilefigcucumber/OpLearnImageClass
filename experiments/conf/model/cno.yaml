@@ -1,0 +1,9 @@
+type: cno
+in_dim: 1                                 # Number of input channels.
+N_classes: 10
+#classifier_activation: SoftMax
+N_layers: 2                      # Number of (D) or (U) blocks in the network
+N_res: 4                              # Number of (R) blocks per level (except the neck)
+N_res_neck: 4                    # Number of (R) blocks in the neck
+channel_multiplier: 10    # How the number of channels evolve?
+use_bn: False

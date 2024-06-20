@@ -56,7 +56,7 @@ def main(conf: DictConfig) -> None:
         p.numel() for p in model.parameters() if p.requires_grad
     )
 
-    print(OmegaConf.to_yaml(conf))
+    # print(OmegaConf.to_yaml(conf))
     # %%
     print(50 * "#")
     print("Starting training.")
@@ -65,6 +65,7 @@ def main(conf: DictConfig) -> None:
     print("Number of trainable params: " + str(total_trainable_params))
 
     early_stopping = EarlyStopping(patience=conf.train.patience, verbose=True)
+    til_epoch = 0
 
     for i in range(conf["train"]["epochs"]):
         print(50 * ".")
@@ -88,6 +89,7 @@ def main(conf: DictConfig) -> None:
 
         if early_stopping.early_stop:
             print("Early stopping")
+            til_epoch = i
             break
 
     tester = train.Tester(test_loader, conf.train)
@@ -102,7 +104,7 @@ def main(conf: DictConfig) -> None:
             + str(conf["im_shape"])
             + "-"
             + "epoch-"
-            + str(i)
+            + str(til_epoch)
             + "-"
             + time_str
         )
@@ -112,7 +114,8 @@ def main(conf: DictConfig) -> None:
                 "history": history,
                 "model_state_dict": model.state_dict(),
                 "im_shape": conf["im_shape"],
-                "trained_til_epoch": i,
+                "trained_til_epoch": til_epoch,
+                "early_stopping_patience": conf.train.patience,
             },
             save_name,
         )
