@@ -12,40 +12,53 @@ from .trigoInterpolation import TrigonometricResize_2d
 
 
 class conv_trigo_stride(nn.Module):
-    def __init__(self,
-                in_planes: int, 
-                out_planes: int, 
-                stride: int = 1, 
-                kernel_size: int = 1,
-                groups: int = 1, 
-                dilation: int = 1,
-                padding:int = 0,
-                bias:bool = False,
-                padding_mode='zeros'):
+    def __init__(
+        self,
+        in_planes: int,
+        out_planes: int,
+        stride: int = 1,
+        kernel_size: int = 1,
+        groups: int = 1,
+        dilation: int = 1,
+        padding: int = 0,
+        bias: bool = False,
+        padding_mode="zeros",
+    ):
 
         super().__init__()
         self.stride = stride
         self.conv = nn.Conv2d(
-                        in_planes,
-                        out_planes,
-                        kernel_size=kernel_size,
-                        stride=1,
-                        padding=padding,
-                        groups=groups,
-                        bias=bias,
-                        dilation=dilation,
-                        padding_mode=padding_mode,
-                    )
+            in_planes,
+            out_planes,
+            kernel_size=kernel_size,
+            stride=1,
+            padding=padding,
+            groups=groups,
+            bias=bias,
+            dilation=dilation,
+            padding_mode=padding_mode,
+        )
         self.resize = TrigonometricResize_2d
-    
+
     def forward(self, x):
         x = self.conv(x)
-        stride_size = [int(np.ceil(x.shape[-2]/self.stride)), int(np.ceil(x.shape[-1]/self.stride))] 
+        stride_size = [
+            int(np.ceil(x.shape[-2] / self.stride)),
+            int(np.ceil(x.shape[-1] / self.stride)),
+        ]
         x = self.resize([stride_size[0], stride_size[1]])(x)
         return x
 
-def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1, padding_mode='zeros',
-            stride_trigo: bool = False) -> nn.Conv2d:
+
+def conv3x3(
+    in_planes: int,
+    out_planes: int,
+    stride: int = 1,
+    groups: int = 1,
+    dilation: int = 1,
+    padding_mode="zeros",
+    stride_trigo: bool = False,
+) -> nn.Conv2d:
     """3x3 convolution with padding"""
 
     if not stride_trigo:
@@ -74,11 +87,23 @@ def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, d
         )
 
 
-def conv1x1(in_planes: int, out_planes: int, stride: int = 1, padding_mode='zeros',
-            stride_trigo: bool = False) -> nn.Conv2d:
+def conv1x1(
+    in_planes: int,
+    out_planes: int,
+    stride: int = 1,
+    padding_mode="zeros",
+    stride_trigo: bool = False,
+) -> nn.Conv2d:
     """1x1 convolution"""
     if not stride_trigo:
-        return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False, padding_mode=padding_mode)
+        return nn.Conv2d(
+            in_planes,
+            out_planes,
+            kernel_size=1,
+            stride=stride,
+            bias=False,
+            padding_mode=padding_mode,
+        )
     else:
         return conv_trigo_stride(
             in_planes,
@@ -89,7 +114,6 @@ def conv1x1(in_planes: int, out_planes: int, stride: int = 1, padding_mode='zero
             bias=False,
             padding_mode=padding_mode,
         )
-
 
 
 class BasicBlock(nn.Module):
@@ -105,8 +129,8 @@ class BasicBlock(nn.Module):
         base_width: int = 64,
         dilation: int = 1,
         norm_layer: Optional[Callable[..., nn.Module]] = None,
-        padding_mode='zeros',
-        stride_trigo: bool = False
+        padding_mode="zeros",
+        stride_trigo: bool = False,
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -116,10 +140,18 @@ class BasicBlock(nn.Module):
         if dilation > 1:
             raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
         # Both self.conv1 and self.downsample layers downsample the input when stride != 1
-        self.conv1 = conv3x3(inplanes, planes, stride, padding_mode=padding_mode, stride_trigo=stride_trigo)
+        self.conv1 = conv3x3(
+            inplanes,
+            planes,
+            stride,
+            padding_mode=padding_mode,
+            stride_trigo=stride_trigo,
+        )
         self.bn1 = norm_layer(planes)
         self.relu = nn.ReLU(inplace=True)
-        self.conv2 = conv3x3(planes, planes, padding_mode=padding_mode, stride_trigo=stride_trigo)
+        self.conv2 = conv3x3(
+            planes, planes, padding_mode=padding_mode, stride_trigo=stride_trigo
+        )
         self.bn2 = norm_layer(planes)
         self.downsample = downsample
         self.stride = stride
@@ -162,7 +194,7 @@ class Bottleneck(nn.Module):
         base_width: int = 64,
         dilation: int = 1,
         norm_layer: Optional[Callable[..., nn.Module]] = None,
-        padding_mode='zeros',
+        padding_mode="zeros",
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -171,7 +203,9 @@ class Bottleneck(nn.Module):
         # Both self.conv2 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv1x1(inplanes, width, padding_mode=padding_mode)
         self.bn1 = norm_layer(width)
-        self.conv2 = conv3x3(width, width, stride, groups, dilation, padding_mode=padding_mode)
+        self.conv2 = conv3x3(
+            width, width, stride, groups, dilation, padding_mode=padding_mode
+        )
         self.bn2 = norm_layer(width)
         self.conv3 = conv1x1(width, planes * self.expansion, padding_mode=padding_mode)
         self.bn3 = norm_layer(planes * self.expansion)
@@ -213,8 +247,8 @@ class ResNet(nn.Module):
         width_per_group: int = 64,
         replace_stride_with_dilation: Optional[List[bool]] = None,
         norm_layer: Optional[Callable[..., nn.Module]] = None,
-        padding_mode = 'zeros',
-        stride_trigo: bool = False
+        padding_mode="zeros",
+        stride_trigo: bool = False,
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -238,24 +272,38 @@ class ResNet(nn.Module):
         self.base_width = width_per_group
 
         if not stride_trigo:
-            self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False, padding_mode=padding_mode)
+            self.conv1 = nn.Conv2d(
+                1,
+                self.inplanes,
+                kernel_size=7,
+                stride=2,
+                padding=3,
+                bias=False,
+                padding_mode=padding_mode,
+            )
         else:
             self.conv1 = conv_trigo_stride(
-                            3,
-                            self.inplanes,
-                            kernel_size=7,
-                            stride=2,
-                            padding=3,
-                            bias=False,
-                            padding_mode=padding_mode,
-                        )
+                1,
+                self.inplanes,
+                kernel_size=7,
+                stride=2,
+                padding=3,
+                bias=False,
+                padding_mode=padding_mode,
+            )
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0])
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1])
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2])
+        self.layer2 = self._make_layer(
+            block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0]
+        )
+        self.layer3 = self._make_layer(
+            block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1]
+        )
+        self.layer4 = self._make_layer(
+            block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2]
+        )
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
@@ -282,7 +330,7 @@ class ResNet(nn.Module):
         planes: int,
         blocks: int,
         stride: int = 1,
-        dilate: bool = False
+        dilate: bool = False,
     ) -> nn.Sequential:
         norm_layer = self._norm_layer
         downsample = None
@@ -292,16 +340,29 @@ class ResNet(nn.Module):
             stride = 1
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
-                conv1x1(self.inplanes, planes * block.expansion, stride, padding_mode=self.padding_mode, stride_trigo=self.stride_trigo),
+                conv1x1(
+                    self.inplanes,
+                    planes * block.expansion,
+                    stride,
+                    padding_mode=self.padding_mode,
+                    stride_trigo=self.stride_trigo,
+                ),
                 norm_layer(planes * block.expansion),
             )
 
         layers = []
         layers.append(
             block(
-                self.inplanes, planes, stride, downsample, self.groups, self.base_width, 
-                previous_dilation, norm_layer, padding_mode=self.padding_mode,
-                stride_trigo=self.stride_trigo
+                self.inplanes,
+                planes,
+                stride,
+                downsample,
+                self.groups,
+                self.base_width,
+                previous_dilation,
+                norm_layer,
+                padding_mode=self.padding_mode,
+                stride_trigo=self.stride_trigo,
             )
         )
         self.inplanes = planes * block.expansion
@@ -310,12 +371,12 @@ class ResNet(nn.Module):
                 block(
                     self.inplanes,
                     planes,
-                    groups = self.groups,
-                    base_width = self.base_width,
-                    dilation = self.dilation,
-                    norm_layer = norm_layer,
-                    padding_mode = self.padding_mode,
-                    stride_trigo = self.stride_trigo
+                    groups=self.groups,
+                    base_width=self.base_width,
+                    dilation=self.dilation,
+                    norm_layer=norm_layer,
+                    padding_mode=self.padding_mode,
+                    stride_trigo=self.stride_trigo,
                 )
             )
 
@@ -323,6 +384,7 @@ class ResNet(nn.Module):
 
     def _forward_impl(self, x: Tensor) -> Tensor:
         # See note [TorchScript super()]
+
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -342,8 +404,10 @@ class ResNet(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         return self._forward_impl(x)
 
-    def name(slef,):
-        return 'resnet'
+    def name(
+        slef,
+    ):
+        return "resnet"
 
 
 def _resnet(
@@ -364,6 +428,6 @@ def _resnet(
     return model
 
 
-def resnet18(*, weights = None, progress: bool = True, **kwargs: Any) -> ResNet:
-    #weights = ResNet18_Weights.verify(weights)
+def resnet18(*, weights=None, progress: bool = True, **kwargs: Any) -> ResNet:
+    # weights = ResNet18_Weights.verify(weights)
     return _resnet(BasicBlock, [2, 2, 2, 2], weights, progress, **kwargs)
