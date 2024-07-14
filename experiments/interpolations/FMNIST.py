@@ -5,10 +5,9 @@ import numpy as np
 import csv
 from tqdm.auto import tqdm
 
-# custom imports
-#%% custom imports
 import sys, os
-sys.path.append(os.path.abspath('../../'))
+
+sys.path.append(os.path.abspath("../../"))
 
 import fourierimaging as fi
 
@@ -20,79 +19,83 @@ import fourierimaging.train as train
 from omegaconf import DictConfig, OmegaConf, open_dict
 from select_sizing import sizing
 
-#path = '../saved_models/cnns/cnn-5-5'
-path = '../saved_models/spectral-cnn-spectral-28-28-20240611-131610'
-conf = torch.load(path)['conf']
-spectral = True
 
-with open_dict(conf):
-    conf['dataset']['path'] = '../../../datasets'
+saved_model_path = "../saved_models/"
+saved_models = sorted([f for f in os.listdir(saved_model_path)])
+saved_models = [
+    saved_model_path + f for f in saved_models if "cnn" in f and "spectral" not in f
+]
 
-device = conf.train.device
-#%% get train, validation and test loader
-train_loader, valid_loader, test_loader = data.load(conf['dataset'])
+for model_path in saved_models:
+    print(model_path)
+    conf = torch.load(model_path)["conf"]
+    """ 
+    with open_dict(conf):
+        conf["dataset"]["path"] = "../../../datasets"
+    """
+    device = conf.train.device
+    # %% get train, validation and test loader
+    train_loader, valid_loader, test_loader = data.load(conf["dataset"])
 
+    model = load_model(conf).to(device)
 
-model = load_model(conf).to(device)
+    model.load_state_dict(torch.load(model_path)["model_state_dict"])
 
-model.load_state_dict(torch.load(path)['model_state_dict'])
+    model_im_shape = list(torch.load(model_path)["conf"]["im_shape"])
+    # print(list(model_im_shape), type(list(model_im_shape)))
+    """ # %%
+    spectral = False
+    if spectral:
+        model = SpectralCNN.from_CNN(model, fix_out=False).to(device)
+    """
+    # %% eval
+    data_sizing = ["TRIGO", "BILINEAR"]
+    model_sizing = ["NONE", "TRIGO", "BILINEAR"]
+    combinations = [(d, m) for d in data_sizing for m in model_sizing]
 
-#%%
-spectral=False
-if spectral:
-    model = SpectralCNN.from_CNN(model, fix_out = False).to(device)
+    fname = "results/FMNIST" + "_Michi" + ".csv"
+    sizes = [13, 18, 23, 28, 33, 38, 43, 48, 53, 58]
 
-#%% eval
-data_sizing = ['TRIGO', 'BILINEAR']
-model_sizing = ['NONE', 'TRIGO', 'BILINEAR']
-combinations = [(d,m) for d in data_sizing for m in model_sizing]        
-        
-fname = 'results/FMNIST' + str(spectral * '-spectral') + '-3.csv'
-size_step = 2
-sizes = np.arange(3,60,size_step)
-sizes = np.append(sizes, [28])
-orig_size = [28,28]
+    model.eval()
+    accs = []
+    for d in data_sizing:
+        accs_loc = []
+        print(20 * "<>")
+        print("Starting test for data sizing: " + d)
+        print(20 * "<>")
+        for s in sizes:
+            acc = 0
+            tot_steps = 0
+            resize_data = sizing(d, [s, s])
+            # resize_model = sizing(m, model_im_shape)
+            # print(s, model_im_shape)
+            with torch.no_grad():
+                for batch_idx, (x, y) in enumerate(test_loader):
+                    # get batch data
+                    x, y = x.to(device), y.to(device)
 
+                    # resize input
 
-model.eval()
-accs = []
-for d, m in combinations:
-    accs_loc = []
-    print(20*'<>')
-    print('Starting test for data sizing: ' + d + ' and model sizing: ' + m)
-    print(20*'<>')
-    for s in sizes:
-        acc = 0
-        tot_steps = 0
-        resize_data = sizing(d, [s,s])
-        resize_model = sizing(m, orig_size)
-        
-        with torch.no_grad():
-            for batch_idx, (x, y) in enumerate(test_loader):
-                # get batch data
-                x, y = x.to(device), y.to(device)
-                
-                #resize input
-                
-                x = resize_data(x)
-                
-                
-                # evaluate
-                x = resize_model(x)
-                pred = model(x)
-                acc += (pred.max(1)[1] == y).sum().item()
-                tot_steps += y.shape[0]
-        print(20*'<>')
-        print('Done for s='+str(s))
-        print('Test Accuracy: ' + str(100 * acc/tot_steps) + str('[%]'))
-        print(20*'<>')
-        accs_loc.append(acc/tot_steps)
-    accs.append([d,m] + accs_loc)
-    
-with open(fname, 'w') as f:
-    writer = csv.writer(f, lineterminator = '\n')
-    writer.writerow(['data sizing', 'model sizing'] + list(sizes))
-    for i in range(len(accs)):
-        writer.writerow(accs[i])
-    
-    
+                    x = resize_data(x)
+                    # print(x.shape)
+
+                    # evaluate
+                    # x = resize_model(x)
+                    pred = model(x)
+                    acc += (pred.max(1)[1] == y).sum().item()
+                    tot_steps += y.shape[0]
+            print(20 * "<>")
+            print("Done for s=" + str(s))
+            print("Test Accuracy: " + str(100 * acc / tot_steps) + str("[%]"))
+            print(20 * "<>")
+            accs_loc.append(acc / tot_steps)
+        accs.append([d, model_im_shape[0]] + accs_loc)
+
+    accs = [[model_path] + col for col in accs]
+
+    # print(accs)
+    with open(fname, "a") as f:
+        writer = csv.writer(f, lineterminator="\n")
+        # writer.writerow(["model name", "data sizing", "model sizing"] + list(sizes))
+        for i in range(len(accs)):
+            writer.writerow(accs[i])
