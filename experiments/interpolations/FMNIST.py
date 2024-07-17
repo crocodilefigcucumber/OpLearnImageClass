@@ -23,7 +23,7 @@ from select_sizing import sizing
 saved_model_path = "../saved_models/"
 saved_models = sorted([f for f in os.listdir(saved_model_path)])
 saved_models = [
-    saved_model_path + f for f in saved_models if "cnn" in f and "spectral" not in f
+    saved_model_path + f for f in saved_models if "resnet" in f and "spectral" not in f
 ]
 
 for model_path in saved_models:
