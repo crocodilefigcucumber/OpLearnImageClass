@@ -3,12 +3,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-palette = sns.color_palette("flare",as_cmap=True)
+palette = sns.color_palette("flare", as_cmap=True)
 sns.set_style("whitegrid")
 sns.set_context("paper")
 
-
-data_sizing = ["TRIGO","BILINEAR"]
+data_sizing = ["TRIGO", "BILINEAR"]
 
 for sizing in data_sizing:
     data = pd.read_csv("./results/FMNIST_Michi.csv")
@@ -23,7 +22,7 @@ for sizing in data_sizing:
     y = y[y["model im shape"] != 8]
 
     CNN10 = (
-        y[data["model name"].str.contains("10-10")]
+        y[data["model name"].str.contains("10-10.*202409", regex=True)]
         .drop(columns=["model name", "data sizing"])
         .sort_values("model im shape")
         .drop(columns="model im shape")
@@ -32,7 +31,7 @@ for sizing in data_sizing:
     CNN10 = [CNN10[i, i] for i in range(CNN10.shape[0])]
 
     CNN25 = (
-        y[data["model name"].str.contains("25-25")]
+        y[data["model name"].str.contains("25-25.*202409", regex=True)]
         .drop(columns=["model name", "data sizing"])
         .sort_values("model im shape")
         .drop(columns="model im shape")
@@ -50,28 +49,44 @@ for sizing in data_sizing:
         .drop(columns=["model name", "model im shape", "data sizing"])
         .to_numpy()[0, :]
     )
-
+    ViT = (
+        y[y["model name"].str.contains("vit")]
+        .drop(columns=["model name", "model im shape", "data sizing"])
+        .to_numpy()[0, :]
+    )
 
     plt.figure()
-    plt.title(f"CNO/resnet VS CNN on native resolution,{sizing}")
+    plt.title(f"CNO/resnet/ViT VS CNN on native resolution,{sizing}")
     plt.plot(image_sizes, CNN10, label="CNN10")
     plt.plot(image_sizes, CNN25, label="CNN25")
     plt.plot(image_sizes, CNO, label="CNO")
     plt.plot(image_sizes, resnet, label="resnet")
-    plt.legend()
-    plt.savefig(f"CNOresnet VS CNN on native resolution,{sizing}.pdf")
-    plt.show()
+    plt.plot(image_sizes, ViT, label="ViT")
 
+    plt.legend()
+    plt.xlabel("resolution")
+    plt.ylabel("accuracy")
+    plt.savefig(f"CNOresnetViT VS CNN on native resolution,{sizing}.pdf")
+    plt.show()
 
     data = data[data["data sizing"] == sizing]
     data = data[data["model im shape"] != 8]
     data = data.sort_values("model im shape")
 
-    data.loc[data["model name"].str.contains("cnn-10", case=False), "model name"] = "CNN10"
-    data.loc[data["model name"].str.contains("cnn-25", case=False), "model name"] = "CNN25"
+    data.loc[
+        data["model name"].str.contains("cnn-10-10.*202409", regex=True, case=False),
+        "model name",
+    ] = "CNN10"
+    data.loc[
+        data["model name"].str.contains("cnn-25-25.*202409", regex=True, case=False),
+        "model name",
+    ] = "CNN25"
 
     data.loc[data["model name"].str.contains("CNO", case=False), "model name"] = "CNO"
-    data.loc[data["model name"].str.contains("resnet", case=False), "model name"] = "resnet"
+    data.loc[data["model name"].str.contains("resnet", case=False), "model name"] = (
+        "resnet"
+    )
+    data.loc[data["model name"].str.contains("vit", case=False), "model name"] = "ViT"
 
     data = pd.melt(
         data,
@@ -84,9 +99,8 @@ for sizing in data_sizing:
     data["model im shape"] = data["model im shape"].astype(int)
     data["im shape"] = data["im shape"].astype(int)
 
-
     filt = data[data["model name"] != "CNN25"]
-    style_order = ["CNO", "resnet", "CNN10"]
+    style_order = ["CNO", "resnet", "ViT", "CNN10"]
     size_order = style_order
 
     sns.relplot(
@@ -102,12 +116,14 @@ for sizing in data_sizing:
         palette=palette,
         legend="full",
     )
-    plt.title(f"CNO/resnet vs CNN10,{sizing}")
-    plt.savefig(f"CNOresnet vs CNN10,{sizing}.pdf")
+    plt.title(f"CNO/resnet/ViT vs CNN10,{sizing}")
+    plt.xlabel("resolution")
+    plt.ylabel("accuracy")
+    plt.savefig(f"CNOresnetViT vs CNN10,{sizing}.pdf")
     plt.show()
 
     filt = data[data["model name"] != "CNN10"]
-    style_order = ["CNO", "resnet", "CNN25"]
+    style_order = ["CNO", "resnet", "ViT", "CNN25"]
     size_order = style_order
 
     sns.relplot(
@@ -123,6 +139,74 @@ for sizing in data_sizing:
         palette=palette,
         legend="full",
     )
-    plt.title(f"CNO/resnet vs CNN25,{sizing}")
-    plt.savefig(f"CNOresnet vs CNN25,{sizing}.pdf")
+    plt.title(f"CNO/resnet/ViT vs CNN25,{sizing}")
+    plt.xlabel("resolution")
+    plt.ylabel("accuracy")
+    plt.savefig(f"CNOresnetViT vs CNN25,{sizing}.pdf")
+    plt.show()
+
+    filt = data[data["model name"] != "CNN10"]
+    fitl = filt[filt["model name"] != "CNN25"]
+    style_order = ["CNO", "resnet", "ViT"]
+    size_order = style_order
+    sns.relplot(
+        data=filt,
+        kind="line",
+        x="im shape",
+        y="acc",
+        # hue="model im shape",
+        style="model name",
+        style_order=style_order,
+        # size="model name",
+        # size_order=size_order,
+        palette=palette,
+        legend="full",
+    )
+    plt.title(f"CNO/resnet/ViT,{sizing}")
+    plt.xlabel("resolution")
+    plt.ylabel("accuracy")
+    plt.savefig(f"CNOresnetViT,{sizing}.pdf")
+    plt.show()
+
+    filt = data[data["model name"].isin(["CNN10"])]
+    style_order = ["CNN10"]
+    size_order = style_order
+    sns.relplot(
+        data=filt,
+        kind="line",
+        x="im shape",
+        y="acc",
+        hue="model im shape",
+        # style="model name",
+        style_order=style_order,
+        # size="model name",
+        # size_order=size_order,
+        palette=palette,
+        legend="full",
+    )
+    plt.title(f"CNN10,{sizing}")
+    plt.xlabel("resolution")
+    plt.ylabel("accuracy")
+    plt.savefig(f"CNN10,{sizing}.pdf")
+
+    filt = data[data["model name"].isin(["CNN25"])]
+    style_order = ["CNN25"]
+    size_order = style_order
+    sns.relplot(
+        data=filt,
+        kind="line",
+        x="im shape",
+        y="acc",
+        hue="model im shape",
+        # style="model name",
+        style_order=style_order,
+        # size="model name",
+        # size_order=size_order,
+        palette=palette,
+        legend="full",
+    )
+    plt.title(f"CNN25,{sizing}")
+    plt.xlabel("resolution")
+    plt.ylabel("accuracy")
+    plt.savefig(f"CNN25,{sizing}.pdf")
     plt.show()
