@@ -3,6 +3,7 @@ import torch.nn as nn
 from torchvision import models
 
 from ..modules.CNO2d import CNO2dClassifier
+from ..modules.FNO2d import FNO2dClassifier
 from ..modules.perceptron import perceptron
 from ..modules.cnn import CNN
 from ..modules.spectralcnn import SpectralCNN
@@ -24,7 +25,7 @@ def fix_seed(seed=0):
 
 
 # %% load model by type
-# added CNO support
+# added CNO and FNO support
 def load_model(conf):
     model_conf = conf.model
 
@@ -117,6 +118,14 @@ def load_model(conf):
             N_res_neck=model_conf.N_res_neck,  # Number of (R) blocks in the neck
             channel_multiplier=model_conf.channel_multiplier,  # How the number of channels evolve?
             use_bn=model_conf.use_bn,
+        )
+    elif model_conf.type == "fno":
+        model = FNO2dClassifier(
+            n_modes_width=model_conf.n_modes,
+            n_modes_height=model_conf.n_modes,
+            n_classes=conf.dataset.num_classes,
+            n_layers=model_conf.N_layers,
+            hidden_channels=model_conf.hidden_channels,
         )
 
     else:

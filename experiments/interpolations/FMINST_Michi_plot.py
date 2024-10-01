@@ -54,19 +54,25 @@ for sizing in data_sizing:
         .drop(columns=["model name", "model im shape", "data sizing"])
         .to_numpy()[0, :]
     )
+    FNO = (
+        y[y["model name"].str.contains("FNO")]
+        .drop(columns=["model name", "model im shape", "data sizing"])
+        .to_numpy()[0, :]
+    )
 
     plt.figure()
-    plt.title(f"CNO/resnet/ViT VS CNN on native resolution,{sizing}")
+    plt.title(f"CNO/resnet/ViT/FNO VS CNN on native resolution,{sizing}")
     plt.plot(image_sizes, CNN10, label="CNN10")
     plt.plot(image_sizes, CNN25, label="CNN25")
     plt.plot(image_sizes, CNO, label="CNO")
     plt.plot(image_sizes, resnet, label="resnet")
     plt.plot(image_sizes, ViT, label="ViT")
+    plt.plot(image_sizes, FNO, label="FNO")
 
     plt.legend()
     plt.xlabel("resolution")
     plt.ylabel("accuracy")
-    plt.savefig(f"CNOresnetViT VS CNN on native resolution,{sizing}.pdf")
+    plt.savefig(f"CNOresnetViTFNO VS CNN on native resolution,{sizing}.pdf")
     plt.show()
 
     data = data[data["data sizing"] == sizing]

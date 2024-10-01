@@ -23,9 +23,7 @@ from select_sizing import sizing
 saved_model_path = "../saved_models/"
 saved_models = sorted([f for f in os.listdir(saved_model_path)])
 saved_models = [
-    saved_model_path + f
-    for f in saved_models
-    if "cnn" in f and "spectral" not in f and "202409" in f
+    saved_model_path + f for f in saved_models if "202410" in f and "FNO" in f
 ]
 
 for model_path in saved_models:
@@ -84,6 +82,7 @@ for model_path in saved_models:
                     # evaluate
                     # x = resize_model(x)
                     pred = model(x)
+                    # print(pred.shape)
                     acc += (pred.max(1)[1] == y).sum().item()
                     tot_steps += y.shape[0]
             print(20 * "<>")

@@ -383,7 +383,6 @@ class CNO2dClassifier(nn.Module):
         size,  # Input spatial size (required )
         N_layers,  # Number of (D) or (U) blocks in the network
         N_classes,  # number classes
-        # classifier_activation=nn.Softmax(),
         N_res=4,  # Number of (R) blocks per level (except the neck)
         N_res_neck=4,  # Number of (R) blocks in the neck
         channel_multiplier=16,  # How the number of channels evolve?
@@ -406,9 +405,7 @@ class CNO2dClassifier(nn.Module):
             channel_multiplier=channel_multiplier,  # How the number of channels evolve?
             use_bn=use_bn,  # Add BN? We do not add BN in lifting/projection layer
         )
-        self.classifier = nn.Sequential(
-            nn.Flatten(), nn.Linear(size * size, N_classes)  # , classifier_activation
-        )
+        self.classifier = nn.Sequential(nn.Flatten(), nn.Linear(size * size, N_classes))
 
     def forward(self, x):
         x = self.CNO(x)

@@ -3,6 +3,6 @@
 /saved_models/
 /multirun/
 /outputs/
-.venv
+.venv*
 fourierimaging.egg-info
 expertiments/new_venv
