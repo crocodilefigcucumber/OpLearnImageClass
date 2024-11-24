@@ -67,18 +67,26 @@ for sizing in data_sizing:
     data["model im shape"] = data["model im shape"].astype(int)
     data["im shape"] = data["im shape"].astype(int)
 
-    filt = data[data["model name"].isin(["CNN25"])]
-    filt = filt.drop(columns=["model name", "data sizing"])
-    filt = filt.pivot(index="model im shape", columns="im shape", values="acc")
-    ax = sns.heatmap(filt, annot=True)
-    ax.set(xlabel="training resolution", ylabel="testing resolution")
-    plt.savefig(f"CNN25-heatmap,{sizing}.pdf")
-    plt.show()
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-    filt = data[data["model name"].isin(["CNN10"])]
-    filt = filt.drop(columns=["model name", "data sizing"])
-    filt = filt.pivot(index="model im shape", columns="im shape", values="acc")
-    ax = sns.heatmap(filt, annot=True)
-    ax.set(xlabel="training resolution", ylabel="testing resolution")
-    plt.savefig(f"CNN10-heatmap,{sizing}.pdf")
+    filt10 = data[data["model name"].isin(["CNN10"])]
+    filt10 = filt10.drop(columns=["model name", "data sizing"])
+    filt10 = filt10.pivot(index="model im shape", columns="im shape", values="acc")
+
+    filt25 = data[data["model name"].isin(["CNN25"])]
+    filt25 = filt25.drop(columns=["model name", "data sizing"])
+    filt25 = filt25.pivot(index="model im shape", columns="im shape", values="acc")
+
+    vmin, vmax = min(filt10.stack().min(), filt25.stack().min()), max(
+        filt10.stack().max(), filt25.stack().max()
+    )
+
+    sns.heatmap(filt10, annot=True, ax=axes[0], vmin=vmin, vmax=vmax, cbar=False)
+    axes[0].set(title="CNN10", xlabel="test resolution", ylabel="train resolution")
+
+    sns.heatmap(filt25, annot=True, ax=axes[1], vmin=vmin, vmax=vmax, cbar=True)
+    axes[1].set(title="CNN25", xlabel="test resolution", ylabel="train resolution")
+
+    plt.tight_layout()
+    plt.savefig(f"CNN-heatmap,{sizing}.pdf")
     plt.show()
