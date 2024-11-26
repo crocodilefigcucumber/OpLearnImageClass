@@ -60,21 +60,35 @@ for sizing in data_sizing:
         .to_numpy()[0, :]
     )
 
+    filt = pd.DataFrame(index=image_sizes)
+    filt["CNN10"] = CNN10
+    filt["CNN25"] = CNN25
+    filt["ResNet"] = resnet
+    filt["ViT"] = ViT
+    filt["CNO"] = CNO
+    filt["FNO"] = FNO
+    
     plt.figure()
-    plt.title(f"CNO/resnet/ViT/FNO VS CNN on native resolution,{sizing}")
+    sns.heatmap(data=filt.transpose(),square=True,cbar=True,annot=True)
+    plt.xlabel("Test Resolution")
+    plt.savefig(f"ModelsVsCNNsOnNativeResolutions,{sizing}")
+    plt.show()
+    # plt.title(f"CNO/resnet/ViT/FNO VS CNN on native resolution,{sizing}")
+    
     plt.plot(image_sizes, CNN10, label="CNN10")
     plt.plot(image_sizes, CNN25, label="CNN25")
     plt.plot(image_sizes, CNO, label="CNO")
-    plt.plot(image_sizes, resnet, label="resnet")
+    plt.plot(image_sizes, resnet, label="ResNet")
     plt.plot(image_sizes, ViT, label="ViT")
     plt.plot(image_sizes, FNO, label="FNO")
 
     plt.legend()
-    plt.xlabel("resolution")
-    plt.ylabel("accuracy")
+    plt.xlabel("Test Resolution")
+    plt.ylabel("Accuracy")
+    plt.tight_layout()
     plt.savefig(f"CNOresnetViTFNO VS CNN on native resolution,{sizing}.pdf")
     plt.show()
-
+    
     data = data[data["data sizing"] == sizing]
     data = data[data["model im shape"] != 8]
     data = data.sort_values("model im shape")
@@ -89,9 +103,9 @@ for sizing in data_sizing:
     ] = "CNN25"
 
     data.loc[data["model name"].str.contains("CNO", case=False), "model name"] = "CNO"
-    data.loc[data["model name"].str.contains("resnet", case=False), "model name"] = (
-        "resnet"
-    )
+    data.loc[
+        data["model name"].str.contains("resnet", case=False), "model name"
+    ] = "ResNet"
     data.loc[data["model name"].str.contains("vit", case=False), "model name"] = "ViT"
 
     data = pd.melt(
@@ -104,7 +118,7 @@ for sizing in data_sizing:
 
     data["model im shape"] = data["model im shape"].astype(int)
     data["im shape"] = data["im shape"].astype(int)
-
+    
     filt = data[data["model name"] != "CNN25"]
     style_order = ["CNO", "resnet", "ViT", "CNN10"]
     size_order = style_order
@@ -122,10 +136,11 @@ for sizing in data_sizing:
         palette=palette,
         legend="full",
     )
-    plt.title(f"CNO/resnet/ViT vs CNN10,{sizing}")
-    plt.xlabel("resolution")
-    plt.ylabel("accuracy")
-    plt.savefig(f"CNOresnetViT vs CNN10,{sizing}.pdf")
+    #    plt.title(f"CNO/resnet/ViT vs CNN10,{sizing}")
+    plt.xlabel("Test Resolution")
+    plt.ylabel("Accuracy")
+    plt.tight_layout()
+    #plt.savefig(f"CNOresnetViT vs CNN10,{sizing}.pdf")
     plt.show()
 
     filt = data[data["model name"] != "CNN10"]
@@ -145,10 +160,11 @@ for sizing in data_sizing:
         palette=palette,
         legend="full",
     )
-    plt.title(f"CNO/resnet/ViT vs CNN25,{sizing}")
-    plt.xlabel("resolution")
-    plt.ylabel("accuracy")
-    plt.savefig(f"CNOresnetViT vs CNN25,{sizing}.pdf")
+    # plt.title(f"CNO/resnet/ViT vs CNN25,{sizing}")
+    plt.xlabel("Test Resolution")
+    plt.ylabel("Accuracy")
+    plt.tight_layout()
+    #plt.savefig(f"CNOresnetViT vs CNN25,{sizing}.pdf")
     plt.show()
 
     filt = data[data["model name"] != "CNN10"]
@@ -168,10 +184,11 @@ for sizing in data_sizing:
         palette=palette,
         legend="full",
     )
-    plt.title(f"CNO/resnet/ViT,{sizing}")
-    plt.xlabel("resolution")
-    plt.ylabel("accuracy")
-    plt.savefig(f"CNOresnetViT,{sizing}.pdf")
+    # plt.title(f"CNO/resnet/ViT,{sizing}")
+    plt.xlabel("Test Resolution")
+    plt.ylabel("Accuracy")
+    plt.tight_layout()
+    #plt.savefig(f"CNOresnetViT,{sizing}.pdf")
     plt.show()
 
     filt = data[data["model name"].isin(["CNN10"])]
@@ -190,10 +207,11 @@ for sizing in data_sizing:
         palette=palette,
         legend="full",
     )
-    plt.title(f"CNN10,{sizing}")
-    plt.xlabel("resolution")
-    plt.ylabel("accuracy")
-    plt.savefig(f"CNN10,{sizing}.pdf")
+    # plt.title(f"CNN10,{sizing}")
+    plt.xlabel("Test Resolution")
+    plt.ylabel("Accuracy")
+    plt.tight_layout()
+    #plt.savefig(f"CNN10,{sizing}.pdf")
 
     filt = data[data["model name"].isin(["CNN25"])]
     style_order = ["CNN25"]
@@ -211,8 +229,20 @@ for sizing in data_sizing:
         palette=palette,
         legend="full",
     )
-    plt.title(f"CNN25,{sizing}")
-    plt.xlabel("resolution")
-    plt.ylabel("accuracy")
-    plt.savefig(f"CNN25,{sizing}.pdf")
+    # plt.title(f"CNN25,{sizing}")
+    plt.xlabel("Test Resolution")
+    plt.ylabel("Accuracy")
+    plt.tight_layout()
+    #plt.savefig(f"CNN25,{sizing}.pdf")
     plt.show()
+    '''    
+    plt.figure()
+    data.rename(columns={"model name": "Model", "im shape": "Test Resolution", "acc": "Accuracy"}, inplace = True)
+    filt = data[["Model","Test Resolution","Accuracy"]]
+    print(filt.Model)
+    filt = filt.pivot(index="Model",columns="Test Resolution",values="Accuracy")
+    sns.heatmap(data=filt,annot=True, square = True, cbar = True)
+    plt.tight_layout()
+    plt.savefig(f"Model-heatmap,{sizing}.pdf")
+    plt.show()
+    '''

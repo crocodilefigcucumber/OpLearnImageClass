@@ -2,6 +2,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from matplotlib.gridspec import GridSpec
 
 palette = sns.color_palette("flare", as_cmap=True)
 sns.set_style("whitegrid")
@@ -67,8 +68,6 @@ for sizing in data_sizing:
     data["model im shape"] = data["model im shape"].astype(int)
     data["im shape"] = data["im shape"].astype(int)
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-
     filt10 = data[data["model name"].isin(["CNN10"])]
     filt10 = filt10.drop(columns=["model name", "data sizing"])
     filt10 = filt10.pivot(index="model im shape", columns="im shape", values="acc")
@@ -81,11 +80,22 @@ for sizing in data_sizing:
         filt10.stack().max(), filt25.stack().max()
     )
 
-    sns.heatmap(filt10, annot=True, ax=axes[0], vmin=vmin, vmax=vmax, cbar=False)
-    axes[0].set(title="CNN10", xlabel="test resolution", ylabel="train resolution")
+    fig = plt.figure(figsize=(14, 6))
+    gs = GridSpec(1, 3, width_ratios=[1, 1, 0.05])  
 
-    sns.heatmap(filt25, annot=True, ax=axes[1], vmin=vmin, vmax=vmax, cbar=True)
-    axes[1].set(title="CNN25", xlabel="test resolution", ylabel="train resolution")
+    ax1 = fig.add_subplot(gs[0])
+    ax2 = fig.add_subplot(gs[1])
+    cbar_ax = fig.add_subplot(gs[2])
+
+    sns.heatmap(filt10, annot=True, square=True, ax=ax1, vmin=vmin, vmax=vmax, cbar=False, cbar_ax=None)
+    ax1.set_title("CNN10")
+    ax1.set_xlabel("Test Resolution")
+    ax1.set_ylabel("Train Resolution")
+
+    sns.heatmap(filt25, annot=True, square=True, ax=ax2, vmin=vmin, vmax=vmax, cbar=True, cbar_ax=cbar_ax)
+    ax2.set_title("CNN25")
+    ax2.set_xlabel("Test Resolution")
+    ax2.set_ylabel("Train Resolution")
 
     plt.tight_layout()
     plt.savefig(f"CNN-heatmap,{sizing}.pdf")
