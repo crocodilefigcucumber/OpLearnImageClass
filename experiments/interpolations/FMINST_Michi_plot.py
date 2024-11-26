@@ -84,8 +84,8 @@ for sizing in data_sizing:
     filt["ResNet"] = resnet
     filt["ViT"] = ViT
 
-    filt["SpectCNN10"] = SpectralCNN10
-    filt["SpectCNN25"] = SpectralCNN25
+    filt["SCNN10"] = SpectralCNN10
+    filt["SCNN25"] = SpectralCNN25
     filt["CNO"] = CNO
     filt["FNO"] = FNO
 

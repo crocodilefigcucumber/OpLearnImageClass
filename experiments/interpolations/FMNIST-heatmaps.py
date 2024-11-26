@@ -154,11 +154,11 @@ for sizing in data_sizing:
     data.loc[
         data["model name"].str.contains("spectral.*10-10", regex=True, case=False),
         "model name",
-    ] = "SpectralCNN10"
+    ] = "SCNN10"
     data.loc[
         data["model name"].str.contains("spectral.*25-25", regex=True, case=False),
         "model name",
-    ] = "SpectralCNN25"
+    ] = "SCNN25"
 
     data.loc[data["model name"].str.contains("CNO", case=False), "model name"] = "CNO"
     data.loc[
@@ -177,11 +177,11 @@ for sizing in data_sizing:
     data["model im shape"] = data["model im shape"].astype(int)
     data["im shape"] = data["im shape"].astype(int)
 
-    filt10 = data[data["model name"].isin(["SpectralCNN10"])]
+    filt10 = data[data["model name"].isin(["SCNN10"])]
     filt10 = filt10.drop(columns=["model name", "data sizing"])
     filt10 = filt10.pivot(index="model im shape", columns="im shape", values="acc")
 
-    filt25 = data[data["model name"].isin(["SpectralCNN25"])]
+    filt25 = data[data["model name"].isin(["SCNN25"])]
     filt25 = filt25.drop(columns=["model name", "data sizing"])
     filt25 = filt25.pivot(index="model im shape", columns="im shape", values="acc")
 
@@ -206,7 +206,7 @@ for sizing in data_sizing:
         cbar=False,
         cbar_ax=None,
     )
-    ax1.set_title("SpectralCNN10")
+    ax1.set_title("SCNN10")
     ax1.set_xlabel("Test Resolution")
     ax1.set_ylabel("Train Resolution")
 
@@ -220,7 +220,7 @@ for sizing in data_sizing:
         cbar=True,
         cbar_ax=cbar_ax,
     )
-    ax2.set_title("SpectralCNN25")
+    ax2.set_title("SCNN25")
     ax2.set_xlabel("Test Resolution")
     ax2.set_ylabel("Train Resolution")
 
