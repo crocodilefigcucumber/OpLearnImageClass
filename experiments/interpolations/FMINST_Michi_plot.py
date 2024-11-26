@@ -21,6 +21,24 @@ for sizing in data_sizing:
     y = data[data["data sizing"] == sizing]
     y = y[y["model im shape"] != 8]
 
+    SpectralCNN10 = (
+        y[data["model name"].str.contains("spectral.*10-10", regex=True)]
+        .drop(columns=["model name", "data sizing"])
+        .sort_values("model im shape")
+        .drop(columns="model im shape")
+        .to_numpy()
+    )
+    SpectralCNN10 = [SpectralCNN10[i, i] for i in range(SpectralCNN10.shape[0])]
+
+    SpectralCNN25 = (
+        y[data["model name"].str.contains("spectral.*25-25", regex=True)]
+        .drop(columns=["model name", "data sizing"])
+        .sort_values("model im shape")
+        .drop(columns="model im shape")
+        .to_numpy()
+    )
+    SpectralCNN25 = [SpectralCNN25[i, i] for i in range(SpectralCNN25.shape[0])]
+
     CNN10 = (
         y[data["model name"].str.contains("10-10.*202409", regex=True)]
         .drop(columns=["model name", "data sizing"])
@@ -65,16 +83,19 @@ for sizing in data_sizing:
     filt["CNN25"] = CNN25
     filt["ResNet"] = resnet
     filt["ViT"] = ViT
+
+    filt["SpectralCNN10"] = SpectralCNN10
+    filt["SpectralCNN25"] = SpectralCNN25
     filt["CNO"] = CNO
     filt["FNO"] = FNO
-    
+
     plt.figure()
-    sns.heatmap(data=filt.transpose(),square=True,cbar=True,annot=True)
+    sns.heatmap(data=filt.transpose(), square=True, cbar=True, annot=True)
     plt.xlabel("Test Resolution")
     plt.savefig(f"ModelsVsCNNsOnNativeResolutions,{sizing}.pdf")
     plt.show()
     # plt.title(f"CNO/resnet/ViT/FNO VS CNN on native resolution,{sizing}")
-    
+
     plt.plot(image_sizes, CNN10, label="CNN10")
     plt.plot(image_sizes, CNN25, label="CNN25")
     plt.plot(image_sizes, CNO, label="CNO")
@@ -88,7 +109,7 @@ for sizing in data_sizing:
     plt.tight_layout()
     plt.savefig(f"CNOresnetViTFNO VS CNN on native resolution,{sizing}.pdf")
     plt.show()
-    
+
     data = data[data["data sizing"] == sizing]
     data = data[data["model im shape"] != 8]
     data = data.sort_values("model im shape")
@@ -118,7 +139,7 @@ for sizing in data_sizing:
 
     data["model im shape"] = data["model im shape"].astype(int)
     data["im shape"] = data["im shape"].astype(int)
-    
+
     filt = data[data["model name"] != "CNN25"]
     style_order = ["CNO", "resnet", "ViT", "CNN10"]
     size_order = style_order
@@ -140,7 +161,7 @@ for sizing in data_sizing:
     plt.xlabel("Test Resolution")
     plt.ylabel("Accuracy")
     plt.tight_layout()
-    #plt.savefig(f"CNOresnetViT vs CNN10,{sizing}.pdf")
+    # plt.savefig(f"CNOresnetViT vs CNN10,{sizing}.pdf")
     plt.show()
 
     filt = data[data["model name"] != "CNN10"]
@@ -164,7 +185,7 @@ for sizing in data_sizing:
     plt.xlabel("Test Resolution")
     plt.ylabel("Accuracy")
     plt.tight_layout()
-    #plt.savefig(f"CNOresnetViT vs CNN25,{sizing}.pdf")
+    # plt.savefig(f"CNOresnetViT vs CNN25,{sizing}.pdf")
     plt.show()
 
     filt = data[data["model name"] != "CNN10"]
@@ -188,7 +209,7 @@ for sizing in data_sizing:
     plt.xlabel("Test Resolution")
     plt.ylabel("Accuracy")
     plt.tight_layout()
-    #plt.savefig(f"CNOresnetViT,{sizing}.pdf")
+    # plt.savefig(f"CNOresnetViT,{sizing}.pdf")
     plt.show()
 
     filt = data[data["model name"].isin(["CNN10"])]
@@ -211,7 +232,7 @@ for sizing in data_sizing:
     plt.xlabel("Test Resolution")
     plt.ylabel("Accuracy")
     plt.tight_layout()
-    #plt.savefig(f"CNN10,{sizing}.pdf")
+    # plt.savefig(f"CNN10,{sizing}.pdf")
 
     filt = data[data["model name"].isin(["CNN25"])]
     style_order = ["CNN25"]
@@ -233,9 +254,9 @@ for sizing in data_sizing:
     plt.xlabel("Test Resolution")
     plt.ylabel("Accuracy")
     plt.tight_layout()
-    #plt.savefig(f"CNN25,{sizing}.pdf")
+    # plt.savefig(f"CNN25,{sizing}.pdf")
     plt.show()
-    '''    
+    """    
     plt.figure()
     data.rename(columns={"model name": "Model", "im shape": "Test Resolution", "acc": "Accuracy"}, inplace = True)
     filt = data[["Model","Test Resolution","Accuracy"]]
@@ -245,4 +266,4 @@ for sizing in data_sizing:
     plt.tight_layout()
     plt.savefig(f"Model-heatmap,{sizing}.pdf")
     plt.show()
-    '''
+    """
