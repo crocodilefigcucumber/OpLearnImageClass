@@ -71,7 +71,7 @@ for sizing in data_sizing:
     plt.figure()
     sns.heatmap(data=filt.transpose(),square=True,cbar=True,annot=True)
     plt.xlabel("Test Resolution")
-    plt.savefig(f"ModelsVsCNNsOnNativeResolutions,{sizing}")
+    plt.savefig(f"ModelsVsCNNsOnNativeResolutions,{sizing}.pdf")
     plt.show()
     # plt.title(f"CNO/resnet/ViT/FNO VS CNN on native resolution,{sizing}")
     
