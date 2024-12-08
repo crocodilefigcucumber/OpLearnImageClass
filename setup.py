@@ -8,10 +8,9 @@ setuptools.setup(
     version="0.0.1",
     author="Samira Kabri and Tim Roith",
     author_email="tim.roith@fau.de",
-    description="Python package for Forier Imaging Networks",
+    description="Python package for Forier Imaging Networks - slightly modified by Michal Mikuta",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/samirak98/FourierImaging",
     packages=['fourierimaging'],
     classifiers=[
                 "Programming Language :: Python :: 3",
