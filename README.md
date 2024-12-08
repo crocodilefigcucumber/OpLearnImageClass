@@ -1,4 +1,6 @@
 # Experiments on FMNIST for ETHZ Semester Paper
+<iframe src="./experiments/interpolations/plots/ModelsVsCNNsOnNativeResolutions,BILINEAR.pdf" width="100%" height="600px"></iframe>
+
 
 Original Setup has been taken from [here](https://github.com/samirak98/FourierImaging), [arxiv](https://arxiv.org/abs/2304.01227), and slight modifications (incl. FNO/CNO implementation) of the codebase have been performed.
 For CNO implementation refer to [this repo](https://github.com/camlab-ethz/ConvolutionalNeuralOperator), ViTs have been fine-tuned using code from [this repo](https://github.com/bwconrad/vit-finetune).
