@@ -11,7 +11,7 @@ sns.set_context("paper")
 data_sizing = ["TRIGO", "BILINEAR"]
 
 for sizing in data_sizing:
-    data = pd.read_csv("./results/FMNIST_Michi.csv")
+    data = pd.read_csv("./results/FMNIST.csv")
 
     image_sizes = [
         col
@@ -116,7 +116,7 @@ for sizing in data_sizing:
     ax2.set_ylabel("Train Resolution")
 
     plt.tight_layout()
-    plt.savefig(f"CNN-heatmap,{sizing}.pdf")
+    plt.savefig(f"plots/CNN-heatmap,{sizing}.pdf")
     plt.show()
 
     # heatmaps for SpectralCNN
@@ -225,5 +225,5 @@ for sizing in data_sizing:
     ax2.set_ylabel("Train Resolution")
 
     plt.tight_layout()
-    plt.savefig(f"SpectralCNN-heatmap,{sizing}.pdf")
+    plt.savefig(f"plots/SpectralCNN-heatmap,{sizing}.pdf")
     plt.show()

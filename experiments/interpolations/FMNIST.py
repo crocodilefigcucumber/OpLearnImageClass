@@ -53,7 +53,7 @@ for model_path in saved_models:
     model_sizing = ["NONE", "TRIGO", "BILINEAR"]
     combinations = [(d, m) for d in data_sizing for m in model_sizing]
 
-    fname = "results/FMNIST" + "_Michi" + ".csv"
+    fname = "results/FMNIST" + ".csv"
     sizes = [13, 18, 23, 28, 33, 38, 43, 48, 53, 58]
 
     model.eval()
